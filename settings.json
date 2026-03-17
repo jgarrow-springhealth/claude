@@ -1,0 +1,40 @@
+{
+  "CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS": true,
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Write|Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "npx prettier --write \"$CLAUDE_FILE_PATH\" 2>/dev/null || true",
+            "timeout": 15
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "APP_ID=$(if [ -n \"$CURSOR_TRACE_ID\" ]; then echo \"com.todesktop.230313mzl4w4u92\"; elif [ \"$TERM_PROGRAM\" = \"vscode\" ]; then echo \"com.microsoft.VSCode\"; elif [ \"$TERM_PROGRAM\" = \"iTerm.app\" ]; then echo \"com.googlecode.iterm2\"; elif [ \"$TERM_PROGRAM\" = \"Apple_Terminal\" ]; then echo \"com.apple.Terminal\"; else ps -p $PPID -o comm= | xargs -I {} osascript -e \"id of app \\\"{}\\\"\" 2>/dev/null || echo \"com.apple.Terminal\"; fi); terminal-notifier -title 'Claude Code' -subtitle \"📁 $(basename $PWD)\" -message '✅ Claude has finished a task.' -sound Glass -execute \"/tmp/activate-window.sh '$PWD' '$APP_ID'\"",
+            "timeout": 5
+          }
+        ]
+      }
+    ],
+    "Notification": [
+      {
+        "matcher": "idle_prompt",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "APP_ID=$(if [ -n \"$CURSOR_TRACE_ID\" ]; then echo \"com.todesktop.230313mzl4w4u92\"; elif [ \"$TERM_PROGRAM\" = \"vscode\" ]; then echo \"com.microsoft.VSCode\"; elif [ \"$TERM_PROGRAM\" = \"iTerm.app\" ]; then echo \"com.googlecode.iterm2\"; elif [ \"$TERM_PROGRAM\" = \"Apple_Terminal\" ]; then echo \"com.apple.Terminal\"; else ps -p $PPID -o comm= | xargs -I {} osascript -e \"id of app \\\"{}\\\"\" 2>/dev/null || echo \"com.apple.Terminal\"; fi); terminal-notifier -title 'Claude Code' -subtitle \"📁 $(basename $PWD)\" -message '⏳ Claude is waiting for your input.' -sound Ping -execute \"/tmp/activate-window.sh '$PWD' '$APP_ID'\"",
+            "timeout": 5
+          }
+        ]
+      }
+    ]
+  }
+}
