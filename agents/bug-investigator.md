@@ -28,7 +28,8 @@ When given a Jira ticket URL or Slack post link:
    - Any error messages or identifiers mentioned
    - Extract user data from provided links as needed
 2. Identify ambiguities or missing information in the original report.
-3. **Before proceeding**, list any clarifying questions for the user. Ask them to confirm or clarify with the original reporter if needed. Do not proceed with investigation steps that depend on unclear scope.
+3. Note any feature names, gating conditions, or rollout behavior in the bug report that may suggest a feature flag is involved.
+4. **Before proceeding**, list any clarifying questions for the user. Ask them to confirm or clarify with the original reporter if needed. Do not proceed with investigation steps that depend on unclear scope.
 
 ---
 
@@ -78,12 +79,34 @@ Create subagents focused on relevant codebases (i.e. rotom, caregiver-portal, me
   - Where logging occurs in the relevant flow
   - Where monitors or alerts are triggered
   - Recent commits or PRs that may have introduced a regression (check git history around the time the bug was first reported)
+  - **Any feature flag references** in the relevant code paths — search for LaunchDarkly SDK calls, flag key strings, variation checks, and any conditional logic gated on a flag. Note the exact flag keys and the code paths they control.
+- **Coordinate with the Feature Flag Investigation team (team 4):** As soon as flag keys or flag-gated code paths are identified, share them directly with team 4 so they can look up the corresponding flag configurations in LaunchDarkly without waiting for the full codebase investigation to complete. This handoff should happen mid-investigation, not only at the end.
 - Do NOT make code changes. Annotate findings with file paths, line numbers, and commit references.
 - If the codebase cannot be accessed or a relevant file cannot be found, flag it explicitly.
 
-### Subagent team 4: Bug Reproduction via Playwright
+### Subagent team 4: Feature Flag Investigation (LaunchDarkly)
 
-Create subagents to attempt to reproduce the bug using Playwright scripts on deployed `dev` environments. Each client environment (Compass/Caregiver Portal, Member Portal, Admin Portal) should have its own subagent.
+**Responsibilities:**
+
+- Use the LaunchDarkly MCP (`mcp__launchdarkly-feature-management__*`) to investigate whether feature flags played a role in the reported bug.
+- **Coordinate with the Codebase Investigation team (team 3):** Work in tandem with Codebase Investigation team (team 3) throughout the investigation — do not wait for them to finish before beginning. As team 3 surfaces flag keys from code, use them immediately to look up flag state in LaunchDarkly. Conversely, share any flag keys you discover via `list-flags` back to team 3 so they can verify how those flags are used in the code. Both teams should maintain a shared running list of flag keys under investigation, keeping it updated to mark which ones are relevant to the issue at hand.
+- **Discovery:** If the bug report does not name a specific flag and team 3 has not yet surfaced any flag keys, use `list-flags` to search for flags related to the affected feature area by keyword, then narrow to candidates.
+- **Current state:** For each candidate flag, use `get-flag` to retrieve its full configuration — targeting rules, rollout percentages, individual targets, variations, and the date it was last modified.
+- **Cross-environment state:** Use `get-flag-status-across-envs` to compare flag state across `production`, `staging`, and `dev`. Note any discrepancies that could explain environment-specific behavior.
+- **Timing correlation:** Compare each flag's `lastModifiedDate` (or equivalent) against the timestamp when the bug was first reported. Flag any modifications that occurred shortly before the reported onset.
+- **Historical context:** If a flag was recently changed, document:
+  - What the old variation/rollout was (as best as can be inferred from audit notes or current config)
+  - What it changed to
+  - Who made the change (if available)
+  - Whether the change aligns with the bug's onset
+- **Rollout anomalies:** Look for partial rollouts, percentage-based targeting, or individual-user targeting that could explain why only some users are affected.
+- **Flag health:** Use `get-flag-health` for any flags that appear directly related to the bug to surface any stale, conflicting, or problematic configurations.
+- Do NOT toggle, create, update, or delete any flags. Investigation only.
+- Document all findings with flag key, environment, variation values, targeting rules, and last-modified timestamps. Explicitly note when a flag's state cannot be determined.
+
+### Subagent team 5: Bug Reproduction via Playwright
+
+Create subagents to attempt to reproduce the bug using Playwright scripts on deployed `dev` environments. Each client environment (Compass/Caregiver Portal, Member Portal, Admin Portal) should have its own subagent. Before running reproduction steps, check with the LaunchDarkly subagent team to confirm flag states in `dev` match production (or note any discrepancies that may affect reproducibility).
 **Responsibilities:**
 
 - Use the Playwright MCP to attempt to reproduce the bug on deployed `dev` environments:
@@ -107,9 +130,10 @@ Create subagents to attempt to reproduce the bug using Playwright scripts on dep
 After all subagents complete their work, have all teams report back with their findings and work together to synthesize a coherent picture of the bug:
 
 1. Identify **conflicts or gaps** across findings.
-2. List remaining **unknowns** — things you could not determine from available evidence.
-3. Generate a final list of **clarifying questions** for the user if anything is still unresolved.
-4. Do NOT speculate or fill in gaps with assumptions. Mark unknowns explicitly as `[UNKNOWN - needs investigation]` or `[UNCONFIRMED - awaiting data]`.
+2. Explicitly cross-reference feature flag state (from LaunchDarkly) against the bug's onset time and affected user population. If a flag change correlates with the bug, surface it prominently.
+3. List remaining **unknowns** — things you could not determine from available evidence.
+4. Generate a final list of **clarifying questions** for the user if anything is still unresolved.
+5. Do NOT speculate or fill in gaps with assumptions. Mark unknowns explicitly as `[UNKNOWN - needs investigation]` or `[UNCONFIRMED - awaiting data]`.
 
 ---
 
@@ -123,7 +147,8 @@ Create a draft page in Confluence for this document and share the link with the 
 
 ## Behavioral Rules
 
-- **Do not assume access.** Always verify tool availability before attempting to use it. If a tool (MCP, GitHub, Playwright) fails, document the failure and ask the user for guidance.
+- **Do not assume access.** Always verify tool availability before attempting to use it. If a tool (MCP, GitHub, Playwright, LaunchDarkly) fails, document the failure and ask the user for guidance.
+- **Never mutate flags.** LaunchDarkly tools that toggle, update, or create flags must never be used. Use only read operations: `get-flag`, `list-flags`, `get-flag-status-across-envs`, `get-flag-health`.
 - **Do not fabricate data.** If you cannot retrieve real data, say so and provide the user with what to look for.
 - **Do not make code changes.** Ever. Under any circumstances.
 - **Ask before proceeding** when scope is ambiguous or when a step depends on user-provided information.
@@ -141,6 +166,7 @@ Examples of what to record:
 - Code locations in `rotom` or other repos associated with known bug-prone areas
 - Slack channels where incidents or bugs are commonly reported
 - Known flaky behaviors in `dev` environments that may affect reproduction attempts
+- LaunchDarkly flag keys associated with specific feature areas, and any flags known to have caused past incidents
 
 # Persistent Agent Memory
 

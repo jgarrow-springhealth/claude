@@ -14,6 +14,7 @@ This repo contains custom Claude Code agents, skills, commands, and configuratio
   - [Notification — Desktop notification when Claude is waiting for input](#notification--desktop-notification-when-claude-is-waiting-for-input)
 - [Agents](#agents)
   - [bug-investigator](#bug-investigator)
+  - [jira-ticket-planner](#jira-ticket-planner)
 - [Skills](#skills)
   - [bug-investigator](#bug-investigator-1)
   - [Ralph — Spec-Driven Development Workflow](#ralph--spec-driven-development-workflow)
@@ -41,15 +42,16 @@ Claude Code automatically picks up files in these directories.
 
 The following MCP servers are configured and available:
 
-| Server         | What it does                                                                 |
-| -------------- | ---------------------------------------------------------------------------- |
-| **GitHub**     | Read/write PRs, issues, branches, files, and code search across GitHub repos |
-| **Slack**      | Read channels, search messages, send messages and drafts, read threads       |
-| **Atlassian**  | Read/write Jira tickets and Confluence pages                                 |
-| **MixPanel**   | Query analytics events, dashboards, and user replay data                     |
-| **Datadog**    | Observability platform access (MCP connected; full permissions TBD)          |
-| **Figma**      | Read Figma/FigJam designs, generate diagrams, manage Code Connect mappings   |
-| **Playwright** | Automate browser interactions for testing and bug reproduction               |
+| Server           | What it does                                                                                                      |
+| ---------------- | ----------------------------------------------------------------------------------------------------------------- |
+| **GitHub**       | Read/write PRs, issues, branches, files, and code search across GitHub repos                                      |
+| **Slack**        | Read channels, search messages, send messages and drafts, read threads                                            |
+| **Atlassian**    | Read/write Jira tickets and Confluence pages                                                                      |
+| **MixPanel**     | Query analytics events, dashboards, and user replay data                                                          |
+| **Datadog**      | Observability platform access (MCP connected; full permissions TBD)                                               |
+| **Figma**        | Read Figma/FigJam designs, generate diagrams, manage Code Connect mappings                                        |
+| **Playwright**   | Automate browser interactions for testing and bug reproduction                                                    |
+| **LaunchDarkly** | Read and inspect feature flag configurations, targeting rules, rollout state, and flag health across environments |
 
 ---
 
@@ -126,6 +128,31 @@ Can you investigate this bug? https://springcare.atlassian.net/browse/ENG-1234
 
 ---
 
+### `jira-ticket-planner`
+
+**File:** `agents/jira-ticket-planner.md`
+
+**Model:** Opus (more capable for nuanced discovery and decomposition work)
+
+**What it does:** Acts as a Technical Product Analyst and Engineering Lead to help you go from a JIRA ticket to a clear, actionable plan. It fetches ticket details via the Atlassian MCP, asks targeted clarifying questions, explores the codebase for relevant context, and either produces a Discovery Summary (for tasks) or breaks the work into well-scoped child tickets (for epics and stories). **Does not write code or make code changes.**
+
+**Workflows by ticket type:**
+
+- **Epics / Stories** — Fetches the ticket, reviews any linked Figma designs (via the Figma MCP), proposes a breakdown of independently deliverable tasks, and (after your approval) creates them in JIRA as child tickets.
+- **Tasks** — Fetches the ticket, explores the codebase to identify relevant files and patterns, and produces a Discovery Summary with a plain-English restatement, files likely to change, an implementation plan, and open questions/risks.
+
+**When to use it:** Any time you're handed a JIRA ticket and want clarity on scope, a decomposition into subtasks, or a codebase-grounded implementation plan before writing any code. Example:
+
+```
+Can you help me break down ENG-42?
+Let's work on ENG-87
+ENG-55 is really vague — can you help me figure out what we're actually building?
+```
+
+**Persistent memory:** This agent maintains its own memory at `~/.claude/agent-memory/jira-ticket-planner/` to build up institutional knowledge across planning sessions (frequently touched files, team naming conventions, common decomposition patterns, recurring ambiguities, etc.).
+
+---
+
 ## Skills
 
 Skills are reusable prompt templates that Claude loads when invoked via `/skill-name`. They live in `skills/` and appear in Claude's available skill list.
@@ -148,7 +175,7 @@ Skills are reusable prompt templates that Claude loads when invoked via `/skill-
 
 ## Ralph — Spec-Driven Development Workflow
 
-A structured Requirements → Plan → Build loop for building features with Claude. Skills: 
+A structured Requirements → Plan → Build loop for building features with Claude. Skills:
 
 - `/ralph:create-requirements`
 - `/ralph:loop`
@@ -159,13 +186,15 @@ A structured Requirements → Plan → Build loop for building features with Cla
 
 See [`skills/ralph/README.md`](skills/ralph/README.md) for full documentation.
 
+\*\*You would put these flat in your `.claude/skills` folder. I've nested them for clearer organization in this repo for easier human readability.
+
 > The Ralph commands are written to be able to work without Beads, but I still prefer to use Beads anyway. Personally, I feel that if it's worth reaching for a Ralph loop, there's no harm or extra work on my part to leverage Beads. But to each their own!
 
 ---
 
 ## Beads — Issue Tracking for AI Agents
 
-A git-native, dependency-aware issue tracker built for AI agent workflows. Replaces markdown TODOs with tracked, committable issues. Skills: 
+A git-native, dependency-aware issue tracker built for AI agent workflows. Replaces markdown TODOs with tracked, committable issues. Skills:
 
 - `/beads:create`
 - `/beads:loop`
@@ -176,6 +205,8 @@ A git-native, dependency-aware issue tracker built for AI agent workflows. Repla
 - `/beads:step`
 
 See [`skills/beads/README.md`](skills/beads/README.md) for full documentation.
+
+\*\*You would put these flat in your `.claude/skills` folder. I've nested them for clearer organization in this repo for easier human readability.
 
 ---
 
