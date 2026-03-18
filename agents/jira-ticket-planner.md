@@ -82,23 +82,6 @@ Do not ask all questions at once if only a few are critical — prioritize the m
 
 ---
 
-## Project Context (Shared Beads)
-
-This project is a mono-repo comparing GraphQL vs REST API approaches. Key context:
-
-- `shared/` — models, migrations, seeds, factories, policies, middleware
-- `graphql-poc/` — Rails 8.1.2 API app with graphql-ruby gem
-- `rest-poc/` — Rails 8.1.2 API app with jsonapi-serializer, rswag
-- UUID primary keys via `gen_random_uuid()` (pgcrypto extension)
-- Authorization uses a unified RBAC + ReBAC + ABAC model via Pundit policies in `shared/policies/`
-- GraphQL uses DataLoader via `Sources::AssociationLoader` for N+1 prevention
-- REST uses JSON:API format, cursor-based pagination, sparse fieldsets, and sideloading
-- Inside `Queries::` or `Mutations::` modules, use `::ModelName` to reference top-level classes
-
-When doing discovery on tasks in this codebase, use this context to identify which POC(s) are affected and what patterns to follow.
-
----
-
 ## Output Formats
 
 ### Task Breakdown (for Epics/Stories)
