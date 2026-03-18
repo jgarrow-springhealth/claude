@@ -16,6 +16,8 @@ This repo contains custom Claude Code agents, skills, commands, and configuratio
   - [bug-investigator](#bug-investigator)
 - [Skills](#skills)
   - [bug-investigator](#bug-investigator-1)
+  - [Ralph — Spec-Driven Development Workflow](#ralph--spec-driven-development-workflow)
+  - [Beads — Issue Tracking for AI Agents](#beads--issue-tracking-for-ai-agents)
 - [Commands](#commands)
   - [/diagram](#diagram)
 - [Tips](#tips)
@@ -144,6 +146,39 @@ Skills are reusable prompt templates that Claude loads when invoked via `/skill-
 
 ---
 
+## Ralph — Spec-Driven Development Workflow
+
+A structured Requirements → Plan → Build loop for building features with Claude. Skills: 
+
+- `/ralph:create-requirements`
+- `/ralph:loop`
+- `/ralph:plan`
+- `/ralph:start-project`
+- `/ralph:status`
+- `/ralph:step`
+
+See [`skills/ralph/README.md`](skills/ralph/README.md) for full documentation.
+
+> The Ralph commands are written to be able to work without Beads, but I still prefer to use Beads anyway. Personally, I feel that if it's worth reaching for a Ralph loop, there's no harm or extra work on my part to leverage Beads. But to each their own!
+
+---
+
+## Beads — Issue Tracking for AI Agents
+
+A git-native, dependency-aware issue tracker built for AI agent workflows. Replaces markdown TODOs with tracked, committable issues. Skills: 
+
+- `/beads:create`
+- `/beads:loop`
+- `/beads:ready`
+- `/beads:review`
+- `/beads:start-project`
+- `beads:status`
+- `/beads:step`
+
+See [`skills/beads/README.md`](skills/beads/README.md) for full documentation.
+
+---
+
 ## Commands
 
 Commands are slash commands that load a prompt into Claude's context when invoked. They live in `commands/` and show up as `/command-name` in Claude Code.
@@ -152,14 +187,12 @@ Commands are slash commands that load a prompt into Claude's context when invoke
 
 **File:** `commands/diagram.md`
 
-**Invocation:** `/diagram [description or ASCII art]`
+**Invocation:** `/diagram [description or doc_filepath.md]`
 
 **What it does:** Creates diagrams in two formats simultaneously:
 
 1. A **FigJam diagram** (via the Figma MCP) with a shareable link
 2. **Mermaid syntax** in a code block you can paste into docs, GitHub, Notion, etc.
-
-**Supported diagram types:** Flowchart, sequence diagram, state diagram, Gantt chart, decision tree.
 
 **Usage examples:**
 
@@ -170,7 +203,9 @@ Commands are slash commands that load a prompt into Claude's context when invoke
 /diagram path/to/file-with-ascii-art.md
 ```
 
-**Why both outputs:** FigJam is great for sharing with non-engineers or for visual polish. Mermaid is great for embedding directly in docs and code. The command gives you both so you can pick what fits your context.
+**Why both outputs:** FigJam is great for sharing with non-engineers or for visual polish. Mermaid is great for embedding directly in docs and code. You can even port Mermaid code into Excalidraw, if that's more your cup of tea. The command gives you both so you can pick what fits your context and preference.
+
+> This command needs some polish. As it's currently written, Claude seems to struggle sometimes with larger diagrams or those that need to handle a lot of text.
 
 ---
 
