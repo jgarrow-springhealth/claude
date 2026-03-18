@@ -14,9 +14,11 @@ This repo contains custom Claude Code agents, skills, commands, and configuratio
   - [Notification — Desktop notification when Claude is waiting for input](#notification--desktop-notification-when-claude-is-waiting-for-input)
 - [Agents](#agents)
   - [bug-investigator](#bug-investigator)
+  - [courtroom](#courtroom)
   - [jira-ticket-planner](#jira-ticket-planner)
 - [Skills](#skills)
   - [bug-investigator](#bug-investigator-1)
+  - [review-pr](#review-pr)
   - [Ralph — Spec-Driven Development Workflow](#ralph--spec-driven-development-workflow)
   - [Beads — Issue Tracking for AI Agents](#beads--issue-tracking-for-ai-agents)
 - [Workflow Patterns](#workflow-patterns)
@@ -133,6 +135,27 @@ Can you investigate this bug? https://springcare.atlassian.net/browse/ENG-1234
 
 ---
 
+### `courtroom`
+
+**File:** `agents/courtroom.md`
+
+**Model:** Sonnet by default (overridable via the `review-pr` skill)
+
+**What it does:** Orchestrates a multi-expert panel of sub-agents to review a Git branch or GitHub Pull Request from every angle — security, performance, observability, DevOps, code quality, testing, and more. Each expert independently reviews the diff through their specific lens, then the Judge synthesizes all findings into a structured verdict with severity-bucketed issues, commendations, and an action checklist. **Read-only — never makes or suggests code changes.**
+
+**Expert panel:**
+
+- **Core panel (always active):** Security Auditor (including dependency review), Performance Analyst, Telemetry & Observability Engineer, DevOps & Infrastructure Reviewer, Code Quality + Testing & Architecture Reviewer
+- **Conditional panel (activated based on detected stack):** a11y Specialist, Documentation & DX Reviewer, Rails Expert, React & Frontend Expert, GraphQL Specialist, Database & Query Reviewer, API Design Reviewer, Mobile Reviewer, TypeScript Reviewer, i18n Reviewer
+
+**Output format:** A structured `COURTROOM REVIEW` document with an executive summary, judge's verdict (Approve / Approve with Required Changes / Reject), issues by severity (Critical → Low), commendations, and a recommended action checklist.
+
+**When to use it:** Before merging any branch or PR where you want a thorough, multi-domain review. Best triggered via the `review-pr` skill (below) rather than directly.
+
+**Persistent memory:** This agent maintains its own memory at `~/.claude/agent-memory/courtroom/` to build up institutional knowledge across reviews (codebase conventions, recurring issue patterns, high-risk areas, past verdicts, etc.).
+
+---
+
 ### `jira-ticket-planner`
 
 **File:** `agents/jira-ticket-planner.md`
@@ -174,6 +197,30 @@ Skills are reusable prompt templates that Claude loads when invoked via `/skill-
 
 ```
 /bug-investigator https://springcare.atlassian.net/browse/ENG-5678
+```
+
+---
+
+### `review-pr`
+
+**File:** `skills/review-pr.md`
+
+**Invocation:** `/review-pr [branch-or-pr-url] [--fast|--deep]`
+
+**What it does:** Thin wrapper that triggers the `courtroom` agent with model selection based on an optional flag:
+
+| Flag     | Model  | Best for                                      |
+| -------- | ------ | --------------------------------------------- |
+| `--fast` | Haiku  | Quick sanity checks, small diffs              |
+| _(none)_ | Sonnet | Standard reviews (default)                    |
+| `--deep` | Opus   | High-stakes PRs, complex changes, pre-release |
+
+**Examples:**
+
+```
+/review-pr main..HEAD
+/review-pr feature/payments-v2 --deep
+/review-pr https://github.com/org/repo/pull/142 --fast
 ```
 
 ---
