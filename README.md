@@ -19,6 +19,11 @@ This repo contains custom Claude Code agents, skills, commands, and configuratio
   - [bug-investigator](#bug-investigator-1)
   - [Ralph — Spec-Driven Development Workflow](#ralph--spec-driven-development-workflow)
   - [Beads — Issue Tracking for AI Agents](#beads--issue-tracking-for-ai-agents)
+- [Workflow Patterns](#workflow-patterns)
+  - [Starting from a JIRA ticket (with Beads)](#starting-from-a-jira-ticket-with-beads)
+  - [Starting from a JIRA ticket (without Beads)](#starting-from-a-jira-ticket-without-beads)
+  - [Starting fresh (no JIRA ticket)](#starting-fresh-no-jira-ticket)
+  - [Why these tools aren't duplicates](#why-these-tools-arent-duplicates)
 - [Commands](#commands)
   - [/diagram](#diagram)
 - [Tips](#tips)
@@ -207,6 +212,120 @@ A git-native, dependency-aware issue tracker built for AI agent workflows. Repla
 See [`skills/beads/README.md`](skills/beads/README.md) for full documentation.
 
 \*\*You would put these flat in your `.claude/skills` folder. I've nested them for clearer organization in this repo for easier human readability.
+
+---
+
+## Workflow Patterns
+
+These tools are designed to work together. Here's how they fit depending on whether you're starting from a JIRA ticket or from scratch.
+
+### Tool responsibilities at a glance
+
+| Tool                        | Job                                                                          | Produces                              |
+| --------------------------- | ---------------------------------------------------------------------------- | ------------------------------------- |
+| `jira-ticket-planner`       | Translate a JIRA ticket into grounded clarity — scope, AC, unknowns resolved | Discovery Summary or JIRA child tasks |
+| `ralph:create-requirements` | Formalize what to build into a structured spec                               | `specs/<name>.md`                     |
+| `ralph:plan`                | Codebase-verified gap analysis                                               | `IMPLEMENTATION_PLAN.md`              |
+| `beads:create`              | Convert plan into tracked, dependency-aware issues                           | Beads issues                          |
+| `beads:loop` / `ralph:loop` | Execute autonomously                                                         | Committed code                        |
+
+Each tool does a distinct job. The ticket planner and `create-requirements` are **not** duplicates — the planner translates JIRA context into human clarity; `create-requirements` formalizes that clarity into the machine-readable spec that the rest of the pipeline depends on. The planner makes `create-requirements` faster (the discovery questions are already answered), but doesn't replace it.
+
+---
+
+### Starting from a JIRA ticket (with Beads)
+
+Use this when your work originates from a JIRA epic or story and you want full dependency-aware task tracking.
+
+```
+jira-ticket-planner [TICKET-ID]      ← resolve scope, acceptance criteria, unknowns; create JIRA child tasks
+        ↓
+/beads:start-project <name>          ← branch + spec template + beads epic
+        ↓
+/ralph:create-requirements <name>    ← formalize the spec using ticket planner output as pre-answered context
+        ↓
+/ralph:plan                          ← codebase-verified gap analysis → IMPLEMENTATION_PLAN.md
+        ↓
+/beads:create                        ← convert plan into tracked issues with dependencies
+        ↓
+/beads:loop <epic-id>                ← autonomous build
+  — or —
+/beads:step <epic-id>                ← one task at a time with human checkpoints
+        ↓
+/beads:review                        ← review implementation, file follow-up beads
+```
+
+**Note on `ralph:create-requirements`:** Because the ticket planner already surfaced the scope, acceptance criteria, and open questions, this phase moves faster — you're formalizing known answers into `specs/<name>.md` rather than running a full discovery conversation. If the ticket was already extremely detailed and well-scoped, you can sometimes write the spec manually and skip the interactive conversation, going straight to `/ralph:plan`.
+
+---
+
+### Starting from a JIRA ticket (without Beads)
+
+Use this for shorter features that fit in one or two sessions and don't need dependency tracking.
+
+```
+jira-ticket-planner [TICKET-ID]      ← resolve scope, acceptance criteria, unknowns; create JIRA child tasks
+        ↓
+/ralph:start-project <name>          ← branch + spec template
+        ↓
+/ralph:create-requirements <name>    ← formalize the spec using ticket planner output as pre-answered context
+        ↓
+/ralph:plan                          ← codebase-verified gap analysis → IMPLEMENTATION_PLAN.md
+        ↓
+/ralph:loop                          ← autonomous build
+  — or —
+/ralph:step                          ← one task at a time with human checkpoints
+```
+
+---
+
+### Starting fresh (no JIRA ticket)
+
+Use this for work that has no associated JIRA ticket.
+
+**With Beads:**
+
+```
+/beads:start-project <name>          ← branch + spec template + beads epic
+        ↓
+/ralph:create-requirements <name>    ← full discovery conversation → spec
+        ↓
+/ralph:plan                          ← gap analysis → IMPLEMENTATION_PLAN.md
+        ↓
+/beads:create                        ← tracked issues
+        ↓
+/beads:loop or /beads:step
+        ↓
+/beads:review
+```
+
+**Without Beads:**
+
+```
+/ralph:start-project <name>
+        ↓
+/ralph:create-requirements <name>
+        ↓
+/ralph:plan
+        ↓
+/ralph:loop or /ralph:step
+```
+
+---
+
+### Why these tools aren't duplicates
+
+It's easy to look at `jira-ticket-planner`, `ralph:create-requirements`, and the `start-project` skills and think they all do the same thing. They don't:
+
+- **`jira-ticket-planner`** works in JIRA's context — it fetches ticket history, linked issues, parent epics, and Figma designs, then asks clarifying questions to resolve ambiguities that exist in the _ticket_. Its output is human-readable clarity and, for epics, JIRA child tasks. It has no concept of specs, branches, or the build pipeline.
+
+- **`ralph:create-requirements`** works in the codebase's context — it produces the structured `specs/<name>.md` file that `ralph:plan`, `beads:create`, and the build loop all depend on as their source of truth. Without this file, the rest of the Ralph/Beads pipeline has nothing to work from.
+
+- **`start-project` skills** are pure scaffolding — they create the branch and the empty spec template. They ask no questions and make no decisions.
+
+- **`ralph:plan`** is a codebase read — it does a gap analysis between the spec and what actually exists in the code. The ticket planner's informal "implementation plan" in a Discovery Summary is not a substitute for this; it doesn't verify against the real codebase.
+
+The practical rule: **use the ticket planner when your work starts in JIRA. Skip it when it doesn't.** Never skip `ralph:create-requirements` — the spec file it produces is the foundation everything else builds on.
 
 ---
 

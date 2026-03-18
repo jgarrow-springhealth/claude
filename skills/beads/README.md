@@ -28,6 +28,30 @@ bd show <id> --json
 
 ---
 
+## Using Beads with the JIRA Ticket Planner
+
+If your work originates from a JIRA ticket, the [`jira-ticket-planner` agent](../../agents/jira-ticket-planner.md) can slot in before the Beads + Ralph workflow to handle JIRA-specific intake. Run it first to resolve scope, acceptance criteria, and unknowns, then enter the normal Beads flow.
+
+```
+jira-ticket-planner [TICKET-ID]      ← JIRA intake: scope, AC, unknowns resolved; epic broken into child tasks
+        ↓
+/beads:start-project <name>          ← branch + spec template + beads epic
+        ↓
+/ralph:create-requirements <name>    ← formalize the spec (faster — ticket planner pre-answered discovery questions)
+        ↓
+/ralph:plan                          ← gap analysis → IMPLEMENTATION_PLAN.md
+        ↓
+/beads:create                        ← convert plan into tracked issues with dependencies
+        ↓
+/beads:loop <epic-id>  or  /beads:step <epic-id>
+        ↓
+/beads:review
+```
+
+The ticket planner and `ralph:create-requirements` are not doing the same thing. The ticket planner resolves JIRA context (linked issues, parent epics, Figma designs, ambiguous requirements). `create-requirements` writes the structured spec file that `ralph:plan` and the build loop use as their source of truth. The planner makes the requirements phase faster — it doesn't replace it. See the [root README](../../README.md#workflow-patterns) for the full explanation.
+
+---
+
 ## Skills
 
 ### `beads:start-project`

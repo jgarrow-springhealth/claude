@@ -8,6 +8,8 @@ Based on the [Ralph Playbook](https://github.com/ClaytonFarr/ralph-playbook).
 
 Ralph can be used standalone or paired with [Beads](../beads/README.md) for issue tracking. The core Requirements → Plan → Build loop is the same either way — Beads just adds dependency-aware task tracking on top of `IMPLEMENTATION_PLAN.md`.
 
+If your work starts from a JIRA ticket, the [`jira-ticket-planner` agent](../../agents/jira-ticket-planner.md) can slot in before the Ralph workflow to handle intake — see [Starting from a JIRA ticket](#starting-from-a-jira-ticket) below.
+
 ### With Beads (recommended for complex features)
 
 ```
@@ -47,6 +49,26 @@ Ralph can be used standalone or paired with [Beads](../beads/README.md) for issu
 ```
 
 **When to skip Beads:** Short, focused features that fit in one session, or projects where you'd prefer lighter tooling.
+
+### Starting from a JIRA ticket
+
+If your feature work starts from a JIRA ticket rather than a blank slate, run the `jira-ticket-planner` agent first to resolve scope, acceptance criteria, and unknowns before entering the Ralph loop. The ticket planner handles JIRA-specific intake that `ralph:create-requirements` wasn't designed for — it fetches linked issues, parent epics, and Figma designs, and asks the clarifying questions that need to be answered before a spec can be written.
+
+**The key distinction:** the ticket planner and `ralph:create-requirements` are not duplicates. The ticket planner produces human-readable clarity; `create-requirements` formalizes that clarity into `specs/<name>.md`, which is the source of truth that `ralph:plan` and the build loop actually consume. Never skip `create-requirements` — always run it after the ticket planner, not instead of it.
+
+```
+jira-ticket-planner [TICKET-ID]      ← JIRA intake: scope, AC, unknowns resolved
+        ↓
+/ralph:start-project <name>          ← branch + spec template
+        ↓
+/ralph:create-requirements <name>    ← formalize spec (faster — ticket planner pre-answered the discovery questions)
+        ↓
+/ralph:plan                          ← gap analysis → IMPLEMENTATION_PLAN.md
+        ↓
+/ralph:loop or /ralph:step
+```
+
+For the Beads version, replace `/ralph:start-project` with `/beads:start-project` and add `/beads:create` and `/beads:loop` — see the full patterns in the [root README](../../README.md#workflow-patterns).
 
 ### Setup
 
