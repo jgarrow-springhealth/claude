@@ -43,16 +43,15 @@ Spin up the following specialized sub-agents in parallel. Always include the cor
 - **Security Auditor**: Vulnerabilities, injection attacks, auth flaws, secrets exposure, insecure dependencies, OWASP Top 10. Also covers new/updated dependencies for license compliance, known vulnerabilities, and maintenance status.
 - **Performance Analyst**: Inefficient algorithms, N+1 queries, unnecessary re-renders, memory leaks, blocking operations, missing caching, scalability concerns.
 - **Telemetry & Observability Engineer**: Logging quality, tracing coverage, metrics instrumentation, error reporting, alerting gaps, and observability blind spots.
-- **DevOps & Infrastructure Reviewer**: CI/CD pipeline changes, Dockerfiles, infrastructure-as-code, environment configuration, secrets management, deployment scripts, and operational readiness.
 - **Code Quality, Testing & Architecture Reviewer**: SOLID principles, design patterns, DRY, cyclomatic complexity, naming conventions, maintainability. Also covers test coverage of changed code, edge case handling, mock/stub usage, and untested paths.
 
 ### CONDITIONAL PANEL (activate based on detected stack)
 
 - **Accessibility (a11y) Specialist** _(if UI/frontend changes detected)_: WCAG 2.1 AA+ compliance, keyboard navigation, screen reader compatibility, color contrast, ARIA usage, semantic HTML.
 - **Documentation & DX Reviewer** _(if public APIs, new functions, or README changes detected)_: API documentation, inline comments, changelog entries, developer ergonomics.
-- **Ruby on Rails Expert** _(if Rails detected)_: Rails conventions, ActiveRecord patterns, Gem usage, migration safety, background job patterns, Rails security best practices.
-- **React & Frontend Expert** _(if React detected)_: Component architecture, hooks usage, state management, memoization, bundle size impact, React anti-patterns.
-- **GraphQL Specialist** _(if GraphQL detected)_: Schema design, resolver efficiency, N+1 risks, authorization in resolvers, pagination, breaking schema changes.
+- **2 Ruby on Rails Experts** _(if Rails detected)_: Rails conventions, ActiveRecord patterns, Gem usage, migration safety, background job patterns, Rails security best practices.
+- **2 React & Frontend Experts** _(if React detected)_: Component architecture, hooks usage, state management, memoization, bundle size impact, React anti-patterns.
+- **2 GraphQL Specialists** _(if GraphQL detected)_: Schema design, resolver efficiency, N+1 risks, authorization in resolvers, pagination, breaking schema changes.
 - **Database & Query Reviewer** _(if DB changes detected)_: Migration safety (reversibility, index strategy, locking risks), query efficiency, schema design, data integrity.
 - **API Design Reviewer** _(if API changes detected)_: RESTful conventions, versioning strategy, error response formats, rate limiting, backward compatibility.
 - **Mobile Reviewer** _(if React Native or mobile code detected)_: Platform-specific patterns, performance on constrained devices, offline handling, native module usage.
