@@ -96,7 +96,6 @@ Stage and commit — be specific, do not use `git add .`:
 ```bash
 git add <specific files changed for this task>
 git commit -m "<description> (<bead-id>)"
-git push
 ```
 
 Close the bead **only after the commit**:
@@ -118,8 +117,7 @@ Report what was done and what `bd ready` shows next, then loop back to step 1.
 - **Beads is the source of truth** — not `IMPLEMENTATION_PLAN.md`, not memory
 - **Study before building** — the #1 failure mode is reimplementing something that already exists
 - **Stage specifically** — `git add <files>`, never `git add .`
-- **Never close a bead without committing first** — the commit is proof of work. Order is always: claim → implement → backpressure → commit → push → close
-- **Push after every commit** — do not accumulate unpushed commits
+- **Never close a bead without committing first** — the commit is proof of work. Order is always: claim → implement → backpressure → commit → close
 - **If a task is unclear, STOP and ask** — do not guess and proceed
 - **If backpressure fails 3 times, STOP and report** — mark blocked, do not loop indefinitely
 - **Never silently skip** — ambiguities and conflicts go into bead notes or as new discovered-from issues
@@ -134,7 +132,6 @@ Before stopping (all tasks done, blocked, or asked to stop):
 ```bash
 bd sync --flush-only
 git status   # verify clean working tree — nothing uncommitted
-git push     # verify everything is pushed to remote
 ```
 
 Report: what was completed this session, what remains in scope, and any blockers.

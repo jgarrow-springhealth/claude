@@ -16,7 +16,7 @@ Execute exactly ONE task from `IMPLEMENTATION_PLAN.md`, then stop and report. Th
 
 - `[ ]` — not started
 - `[~]` — in progress
-- `[x]` — complete (only after commit + push)
+- `[x]` — complete (only after commit)
 - `[!]` — blocked (explain inline)
 
 ---
@@ -66,7 +66,6 @@ Stage and commit all files changed for this task — be specific, do not use `gi
 ```bash
 git add <specific files changed for this task>
 git commit -m "<task title>"
-git push
 ```
 
 Mark the task `[x]` in `IMPLEMENTATION_PLAN.md` **only after the commit**.
@@ -83,8 +82,7 @@ Report what was done and what tasks are ready next.
 - **`IMPLEMENTATION_PLAN.md` is the source of truth** — not memory, not prior context
 - **Study before building** — the #1 failure mode is reimplementing something that already exists
 - **Stage specifically** — `git add <files>`, never `git add .`
-- **Never mark `[x]` without committing first** — the commit is proof of work. Order is always: claim → implement → backpressure → commit → push → close
-- **Push after every commit** — do not accumulate unpushed commits
+- **Never mark `[x]` without committing first** — the commit is proof of work. Order is always: claim → implement → backpressure → commit → close
 - **If a task is unclear, STOP and ask** — do not guess and proceed
 - **If backpressure fails 3 times, STOP and report** — mark blocked, do not loop indefinitely
 - **Never silently skip** — ambiguities and conflicts go into the plan as notes or `[!]` blocked tasks or as new discovered-from tasks

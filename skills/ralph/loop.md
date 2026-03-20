@@ -19,7 +19,7 @@ Update task checkboxes in `IMPLEMENTATION_PLAN.md` to track state in real time:
 
 - `[ ]` — not started
 - `[~]` — in progress (claim before starting work)
-- `[x]` — complete (only after commit + push)
+- `[x]` — complete (only after commit)
 - `[!]` — blocked (explain inline)
 
 ---
@@ -70,7 +70,6 @@ Stage and commit all files changed for this task — be specific, do not use `gi
 ```bash
 git add <specific files changed for this task>
 git commit -m "<task title>"
-git push
 ```
 
 Mark the task `[x]` in `IMPLEMENTATION_PLAN.md` **only after the commit**, then commit the plan update:
@@ -78,7 +77,6 @@ Mark the task `[x]` in `IMPLEMENTATION_PLAN.md` **only after the commit**, then 
 ```bash
 git add IMPLEMENTATION_PLAN.md
 git commit -m "mark <task> complete"
-git push
 ```
 
 ### 8. Summarize and Repeat
@@ -93,8 +91,7 @@ Report what was done and what tasks are ready next, then loop back to step 1.
 - **`IMPLEMENTATION_PLAN.md` is the source of truth** — not memory, not prior context
 - **Study before building** — the #1 failure mode is reimplementing something that already exists
 - **Stage specifically** — `git add <files>`, never `git add .`
-- **Never mark `[x]` without committing first** — the commit is proof of work. Order is always: claim → implement → backpressure → commit → push → close
-- **Push after every commit** — do not accumulate unpushed commits
+- **Never mark `[x]` without committing first** — the commit is proof of work. Order is always: claim → implement → backpressure → commit → close
 - **If a task is unclear, STOP and ask** — do not guess and proceed
 - **If backpressure fails 3 times, STOP and report** — mark `[!]`, do not loop indefinitely
 - **Never silently skip** — ambiguities and conflicts go into the plan as notes or `[!]` blocked tasks
@@ -108,7 +105,6 @@ Before stopping (all tasks done, blocked, or asked to stop):
 
 ```bash
 git status   # verify clean working tree — nothing uncommitted
-git push     # verify everything is pushed to remote
 ```
 
 Report: what was completed this session, what remains, and any blockers.
