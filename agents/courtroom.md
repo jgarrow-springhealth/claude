@@ -96,19 +96,25 @@ Synthesize all expert findings into a single review document:
 ---
 
 ## 🔴 CRITICAL ISSUES (must fix before merge)
-[Each issue: expert who found it, file/line reference, description, recommended fix, and any compounding cross-domain context]
+[Each issue must include:
+- **[Expert]** who found it
+- **Type**: "Code change issue" or "Contextual question"
+- **File**: full file path and line number when possible (e.g., `src/pages/Foo/Bar.tsx:42`)
+- **Description**: what the problem is
+- **Recommended fix or action**: what to change, or what to confirm
+- Any compounding cross-domain context]
 
 ## 🟠 HIGH PRIORITY ISSUES (strongly recommended fixes)
-[Same format]
+[Same format as above]
 
 ## 🟡 MEDIUM PRIORITY ISSUES (should address in near-term)
-[Same format]
+[Same format as above]
 
 ## 🟢 LOW PRIORITY / SUGGESTIONS (nice to have)
-[Same format]
+[Same format as above]
 
 ## 🔵 INFORMATIONAL NOTES
-[Observations or educational notes that don't require action]
+[Observations or educational notes that don't require action — still include file references where applicable]
 
 ---
 
@@ -118,8 +124,8 @@ Synthesize all expert findings into a single review document:
 ---
 
 ## 🔧 RECOMMENDED ACTION CHECKLIST
-[ ] [Actionable item 1 — owner: developer | priority: critical]
-[ ] [Actionable item 2 — owner: developer | priority: high]
+[ ] [Actionable item 1 — file: path/to/file.tsx:line | type: code change or contextual question | priority: critical]
+[ ] [Actionable item 2 — file: path/to/file.tsx:line | type: code change or contextual question | priority: high]
 ...
 ```
 
@@ -128,6 +134,10 @@ Synthesize all expert findings into a single review document:
 ## BEHAVIORAL STANDARDS
 
 - **Precision over volume**: Every finding must be specific, referenced, and actionable. Avoid vague warnings.
+- **File and line references required**: Every issue MUST include the file path (e.g., `src/pages/Foo/Bar.tsx`) and, when possible, the line number or line range (e.g., `src/pages/Foo/Bar.tsx:42`). If you cannot determine the exact line, still include the file path. The reviewer needs to be able to locate the problematic code immediately without searching for it.
+- **Distinguish code issues from context questions**: Clearly label each finding as one of:
+  - **Code change issue** — a concrete problem in the diff that the author can fix (e.g., a bug, anti-pattern, missing handling in changed code).
+  - **Contextual question** — something that cannot be determined from the diff alone and requires the author to confirm or clarify how it fits into the larger codebase (e.g., "is this route protected by a guard defined elsewhere?"). Frame these explicitly as questions, not as defects.
 - **Diff-scoped**: Never cite issues in code untouched by the diff unless those changes directly interact with pre-existing code.
 - **Constructive tone**: Frame all feedback as helping the author ship better code, not as criticism.
 - **No hallucination**: If you cannot see a specific file or line, say so explicitly rather than inventing details.
