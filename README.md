@@ -13,12 +13,26 @@ This repo contains custom Claude Code agents, skills, commands, and configuratio
   - [Stop — Desktop notification when Claude finishes](#stop--desktop-notification-when-claude-finishes)
   - [Notification — Desktop notification when Claude is waiting for input](#notification--desktop-notification-when-claude-is-waiting-for-input)
 - [Agents](#agents)
-  - [bug-investigator](#bug-investigator)
-  - [courtroom](#courtroom)
-  - [jira-ticket-planner](#jira-ticket-planner)
+  - [Bug Investigation](#bug-investigation)
+    - [bug-investigator](#bug-investigator) (orchestrator)
+    - [data-investigator](#data-investigator) (standalone)
+    - [codebase-investigator](#codebase-investigator) (standalone)
+    - [playwright-bug-reproducer](#playwright-bug-reproducer) (standalone)
+  - [Code Review](#code-review)
+    - [courtroom](#courtroom)
+  - [Planning](#planning)
+    - [jira-ticket-planner](#jira-ticket-planner)
+    - [gap-analyzer](#gap-analyzer)
+  - [GraphQL Specialist Agents](#graphql-specialist-agents)
 - [Skills](#skills)
-  - [bug-investigator](#bug-investigator-1)
-  - [review-pr](#review-pr)
+  - [Bug Investigation](#bug-investigation-1)
+    - [/bug-investigator](#bug-investigator-1) (full investigation)
+    - [/data-investigator](#data-investigator-1) (data only)
+    - [/codebase-investigator](#codebase-investigator-1) (code only)
+    - [/reproduce-bug](#reproduce-bug) (reproduction only)
+  - [Code Review](#code-review-1)
+    - [/review-pr](#review-pr)
+    - [/review-code (multi-model)](#review-code-multi-model)
   - [Ralph — Spec-Driven Development Workflow](#ralph--spec-driven-development-workflow)
   - [Beads — Issue Tracking for AI Agents](#beads--issue-tracking-for-ai-agents)
 - [Workflow Patterns](#workflow-patterns)
@@ -106,26 +120,30 @@ Hooks are shell commands that Claude Code runs automatically in response to cert
 
 Agents are subprocesses that Claude can spin up to handle specialized tasks autonomously. They live in `agents/` and are loaded by Claude Code as available agent types.
 
-### `bug-investigator`
+### Bug Investigation
+
+The bug investigation system is built as one orchestrator (`bug-investigator`) that coordinates several specialized sub-agents. Each sub-agent is also exposed as its own standalone agent so you can use any piece of the investigation pipeline in isolation — for example, querying just the data layer or just the codebase without running the full investigation.
+
+#### `bug-investigator`
 
 **File:** `agents/bug-investigator.md`
 
 **Model:** Opus (more capable for complex investigation work)
 
-**What it does:** Orchestrates a team of subagents to investigate a reported bug from multiple angles — data, logs, code, Slack history, and live browser reproduction. Produces an RCA-style report. **Does not make any code changes.**
+**What it does:** The orchestrator. Coordinates a team of subagents to investigate a reported bug from multiple angles — data, logs, code, Slack history, and live browser reproduction. Produces an RCA-style report. **Does not make any code changes.**
 
 **Investigation phases:**
 
 1. **Bug Intake** — Parses the Jira ticket or Slack link, identifies ambiguities, asks clarifying questions before diving in.
 2. **Parallel Investigation** — Launches subagent teams for:
-   - Data investigation (Snowflake queries, Datadog logs, MixPanel analytics)
+   - Data investigation via `data-investigator` (Snowflake queries, Datadog logs, MixPanel analytics)
    - Slack research (related threads, prior incidents, customer complaints)
-   - Codebase investigation (GitHub — primarily `rotom` for backend, plus client repos)
-   - Bug reproduction via Playwright on `dev` environments
+   - Codebase investigation via `codebase-investigator` (GitHub — primarily `rotom` for backend, plus client repos)
+   - Bug reproduction via `playwright-bug-reproducer` on `dev` environments
 3. **Synthesis** — Cross-references findings, flags gaps and unknowns.
 4. **RCA Documentation** — Produces a structured RCA doc following the SpringCare Confluence template.
 
-**When to use it:** Give it a Jira ticket URL or Slack link describing the bug. Example:
+**When to use it:** When you want a full, multi-source investigation. Give it a Jira ticket URL or Slack link describing the bug. Example:
 
 ```
 Can you investigate this bug? https://springcare.atlassian.net/browse/ENG-1234
@@ -133,9 +151,55 @@ Can you investigate this bug? https://springcare.atlassian.net/browse/ENG-1234
 
 **Persistent memory:** This agent maintains its own memory at `~/.claude/agent-memory/bug-investigator/` to build up institutional knowledge across investigations (table schemas, log patterns, known flaky behaviors, etc.).
 
+#### `data-investigator`
+
+**File:** `agents/data-investigator.md`
+
+**Model:** Opus
+
+**What it does:** Queries Snowflake, Datadog, and MixPanel for data signals related to reported bugs. Launches three parallel subagents — one for MixPanel (via MCP), one for Datadog (via MCP), and one for Snowflake (generates manual SQL queries). When MCP access is unavailable, it generates manual queries labeled `[REQUIRES USER ACTION]`. **Does not make code changes.**
+
+**Standalone use:** For a quick data-only investigation when you want to see what the data shows before committing to a full bug investigation. Give it a Jira ticket URL or a bug description with known identifiers. Example:
+
+```
+Can you pull the data for this bug? https://springhealth.atlassian.net/browse/BUG-1234
+```
+
+#### `codebase-investigator`
+
+**File:** `agents/codebase-investigator.md`
+
+**Model:** Opus
+
+**What it does:** Searches relevant GitHub repos to identify the responsible code path for a reported bug. Launches parallel subagents (one per repo) to search code, inspect git history, find feature flag references, and check LaunchDarkly flag state. Derives human-readable reproduction steps and surfaces recent commits or PRs that may have introduced a regression. **Read-only — does not make code changes.**
+
+**Standalone use:** When you want to understand which code is responsible for a bug without running a full investigation. Give it a Jira URL, Slack link, or bug description with the affected app. Example:
+
+```
+Can you find the code responsible for this? https://springhealth.atlassian.net/browse/BUG-5678
+```
+
+#### `playwright-bug-reproducer`
+
+> ⚠️ **WIP** — This one is still a work in progress and is not yet in a reliable state.
+
+**File:** `agents/playwright-bug-reproducer.md`
+
+**Model:** Sonnet
+
+**What it does:** Reproduces reported bugs on SpringCare's deployed dev environments using Playwright. Handles role-based credential lookup automatically — no need to provide login credentials. Supports Compass, Member Portal, and Admin Portal dev environments. Produces a reproduction report with screenshots, observed vs. expected behavior, and success/failure status. **Does not make code changes.**
+
+**Standalone use:** When you want to verify whether a bug is reproducible on dev without running a full investigation. Example:
+
+```
+Can you try to reproduce this on dev? Members are getting a blank screen after clicking 'Start session'.
+```
+
 ---
 
-### `courtroom`
+### Code Review
+
+#### `courtroom`
 
 **File:** `agents/courtroom.md`
 
@@ -156,7 +220,9 @@ Can you investigate this bug? https://springcare.atlassian.net/browse/ENG-1234
 
 ---
 
-### `jira-ticket-planner`
+### Planning
+
+#### `jira-ticket-planner`
 
 **File:** `agents/jira-ticket-planner.md`
 
@@ -179,19 +245,65 @@ ENG-55 is really vague — can you help me figure out what we're actually buildi
 
 **Persistent memory:** This agent maintains its own memory at `~/.claude/agent-memory/jira-ticket-planner/` to build up institutional knowledge across planning sessions (frequently touched files, team naming conventions, common decomposition patterns, recurring ambiguities, etc.).
 
+#### `gap-analyzer`
+
+**File:** `agents/gap-analyzer.md`
+
+**Model:** Opus
+
+**What it does:** Compares spec files against the current codebase and produces an implementation plan. **Read-only — does not make code changes.**
+
+**When to use it:** When you have specs and want to understand what needs to be built. This is used internally by `ralph:plan` but can also be invoked directly.
+
+---
+
+### GraphQL Specialist Agents
+
+Three specialized agents for writing and reviewing GraphQL code, each focused on a different part of the stack. They share a library of reference files in `agents/graphql/graphql-references/` containing best practices, patterns, and anti-patterns.
+
+See [`agents/graphql/README.md`](agents/graphql/README.md) for detailed documentation of each agent and its reference files.
+
+#### `graphql-apollo-client-expert`
+
+**File:** `agents/graphql/graphql-apollo-client-expert.md`
+
+**Model:** Sonnet
+
+**What it does:** Writes and reviews React code that consumes GraphQL APIs using Apollo Client, TypeScript, and GraphQL Code Generator. Use this for apps that use Apollo Client — NOT for apps using React Query/TanStack Query.
+
+#### `graphql-react-query-expert`
+
+**File:** `agents/graphql/graphql-react-query-expert.md`
+
+**Model:** Sonnet
+
+**What it does:** Writes and reviews React code that consumes GraphQL APIs using TanStack Query, graphql-request, TypeScript, and GraphQL Code Generator. Use this for apps that use React Query — NOT for apps using Apollo Client.
+
+#### `graphql-backend-expert`
+
+**File:** `agents/graphql/graphql-backend-expert.md`
+
+**Model:** Opus
+
+**What it does:** Writes and reviews backend GraphQL code using the graphql-ruby gem in Rails applications. Covers schema design, resolvers, mutations, subscriptions, error handling, performance (DataLoader), and security.
+
 ---
 
 ## Skills
 
 Skills are reusable prompt templates that Claude loads when invoked via `/skill-name`. They live in `skills/` and appear in Claude's available skill list.
 
-### `bug-investigator`
+### Bug Investigation
+
+These skills mirror the agent structure above. `/bug-investigator` runs the full orchestrated investigation; the others let you use individual pieces of that pipeline in isolation when you don't need the whole thing.
+
+#### `/bug-investigator`
 
 **File:** `skills/bug-investigator.md`
 
 **Invocation:** `/bug-investigator [bug-ticket-url]`
 
-**What it does:** Thin wrapper that triggers the `bug-investigator` agent (above) with the provided bug ticket URL as input. This is the primary way to kick off a bug investigation — just type the slash command followed by a Jira or Slack link.
+**What it does:** Triggers the full `bug-investigator` agent — the orchestrator that launches data, codebase, Slack, and reproduction subagents in parallel. This is the primary way to kick off a complete bug investigation.
 
 **Example:**
 
@@ -199,15 +311,59 @@ Skills are reusable prompt templates that Claude loads when invoked via `/skill-
 /bug-investigator https://springcare.atlassian.net/browse/ENG-5678
 ```
 
+#### `/data-investigator`
+
+**File:** `skills/data-investigator.md`
+
+**Invocation:** `/data-investigator [bug-ticket-url or bug-description-with-identifiers]`
+
+**What it does:** Launches just the `data-investigator` agent for a quick data-only investigation across Snowflake, Datadog, and MixPanel — without the codebase search, Slack research, or reproduction steps.
+
+**Example:**
+
+```
+/data-investigator https://springcare.atlassian.net/browse/ENG-4321
+```
+
+#### `/codebase-investigator`
+
+**File:** `skills/codebase-investigator.md`
+
+**Invocation:** `/codebase-investigator [bug-ticket-url or bug-description-with-app]`
+
+**What it does:** Launches just the `codebase-investigator` agent for a focused code + feature flag investigation — without the data queries, Slack research, or reproduction steps.
+
+**Example:**
+
+```
+/codebase-investigator https://springcare.atlassian.net/browse/ENG-9876
+```
+
+#### `/reproduce-bug`
+
+**File:** `skills/reproduce-bug.md`
+
+**Invocation:** `/reproduce-bug [bug-description, repro-steps, role-or-email]`
+
+**What it does:** Launches just the `playwright-bug-reproducer` agent to attempt bug reproduction on dev — without any of the data or codebase investigation. Handles credential lookup automatically based on user role.
+
+**Example:**
+
+```
+/reproduce-bug Members see blank screen after clicking Start Session. Steps: log in as member, go to home, click Start Session. Role: member
+```
+
 ---
 
-### `review-pr`
+### Code Review
+
+#### `/review-pr`
 
 **File:** `skills/review-pr.md`
 
 **Invocation:** `/review-pr [branch-or-pr-url] [--fast|--deep]`
 
-**What it does:** Thin wrapper that triggers the `courtroom` agent with model selection based on an optional flag:
+**What it does:** Triggers the `courtroom` agent with model selection based on an optional flag:
 
 | Flag     | Model  | Best for                                      |
 | -------- | ------ | --------------------------------------------- |
@@ -221,6 +377,20 @@ Skills are reusable prompt templates that Claude loads when invoked via `/skill-
 /review-pr main..HEAD
 /review-pr feature/payments-v2 --deep
 /review-pr https://github.com/org/repo/pull/142 --fast
+```
+
+#### `/review-code` (multi-model)
+
+**File:** `skills/review-pr-multi-model/SKILL.md`
+
+**Invocation:** `/review-code [pr-url-or-branch-name]`
+
+**What it does:** Multi-model code review that uses a panel of diverse AI reviewers (Haiku, Sonnet, Opus) to independently review code changes, then filters findings through a jury vote and judge synthesis to produce high-signal feedback. Useful when you want diverse perspectives and reduced noise compared to a single-model review.
+
+**Example:**
+
+```
+/review-code https://github.com/org/repo/pull/142
 ```
 
 ---
