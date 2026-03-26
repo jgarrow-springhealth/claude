@@ -341,6 +341,8 @@ These skills mirror the agent structure above. `/bug-investigator` runs the full
 
 #### `/reproduce-bug`
 
+> ⚠️ **WIP** — This one is still a work in progress and is not yet in a reliable state.
+
 **File:** `skills/reproduce-bug.md`
 
 **Invocation:** `/reproduce-bug [bug-description, repro-steps, role-or-email]`
