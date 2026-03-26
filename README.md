@@ -19,7 +19,7 @@ This repo contains custom Claude Code agents, skills, commands, and configuratio
     - [codebase-investigator](#codebase-investigator) (standalone)
     - [playwright-bug-reproducer](#playwright-bug-reproducer) (standalone)
   - [Code Review](#code-review)
-    - [courtroom](#courtroom)
+    - [bug-jury](#bug-jury)
   - [Planning](#planning)
     - [jira-ticket-planner](#jira-ticket-planner)
     - [gap-analyzer](#gap-analyzer)
@@ -199,9 +199,9 @@ Can you try to reproduce this on dev? Members are getting a blank screen after c
 
 ### Code Review
 
-#### `courtroom`
+#### `bug-jury`
 
-**File:** `agents/courtroom.md`
+**File:** `agents/bug-jury.md`
 
 **Model:** Sonnet by default (overridable via the `review-pr` skill)
 
@@ -212,11 +212,11 @@ Can you try to reproduce this on dev? Members are getting a blank screen after c
 - **Core panel (always active):** Security Auditor (including dependency review), Performance Analyst, Telemetry & Observability Engineer, DevOps & Infrastructure Reviewer, Code Quality + Testing & Architecture Reviewer
 - **Conditional panel (activated based on detected stack):** a11y Specialist, Documentation & DX Reviewer, Rails Expert, React & Frontend Expert, GraphQL Specialist, Database & Query Reviewer, API Design Reviewer, Mobile Reviewer, TypeScript Reviewer, i18n Reviewer
 
-**Output format:** A structured `COURTROOM REVIEW` document with an executive summary, judge's verdict (Approve / Approve with Required Changes / Reject), issues by severity (Critical → Low), commendations, and a recommended action checklist.
+**Output format:** A structured `BUG JURY REVIEW` document with an executive summary, judge's verdict (Approve / Approve with Required Changes / Reject), issues by severity (Critical → Low), commendations, and a recommended action checklist.
 
 **When to use it:** Before merging any branch or PR where you want a thorough, multi-domain review. Best triggered via the `review-pr` skill (below) rather than directly.
 
-**Persistent memory:** This agent maintains its own memory at `~/.claude/agent-memory/courtroom/` to build up institutional knowledge across reviews (codebase conventions, recurring issue patterns, high-risk areas, past verdicts, etc.).
+**Persistent memory:** This agent maintains its own memory at `~/.claude/agent-memory/bug-jury/` to build up institutional knowledge across reviews (codebase conventions, recurring issue patterns, high-risk areas, past verdicts, etc.).
 
 ---
 
@@ -365,7 +365,7 @@ These skills mirror the agent structure above. `/bug-investigator` runs the full
 
 **Invocation:** `/review-pr [branch-or-pr-url] [--fast|--deep]`
 
-**What it does:** Triggers the `courtroom` agent with model selection based on an optional flag:
+**What it does:** Triggers the `bug-jury` agent with model selection based on an optional flag:
 
 | Flag     | Model  | Best for                                      |
 | -------- | ------ | --------------------------------------------- |

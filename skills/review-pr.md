@@ -1,12 +1,12 @@
 ---
 name: review-pr
-description: Perform a comprehensive code review using the Courtroom agent. Accepts an optional mode argument to control depth and model.
+description: Perform a comprehensive code review using the Bug Jury agent. Accepts an optional mode argument to control depth and model.
 argument-hint: [branch-or-pr-url] [fast|deep]
 ---
 
-# Courtroom Code Review
+# Bug Jury Code Review
 
-Launch the `courtroom` agent to review the branch or PR in `$ARGUMENTS`.
+Launch the `bug-jury` agent to review the branch or PR in `$ARGUMENTS`.
 
 ## Model selection
 
@@ -20,4 +20,4 @@ Strip the mode flag/word from the target before passing it to the agent (e.g. `"
 
 ## Instructions
 
-Launch the courtroom agent with the selected model and pass the branch name or PR URL as the target to review. If no branch or PR is specified, ask the user before proceeding.
+Launch the bug-jury agent with the selected model and pass the branch name or PR URL as the target to review. If no branch or PR is specified, ask the user before proceeding.
