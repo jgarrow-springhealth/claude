@@ -15,11 +15,11 @@ For React apps that consume GraphQL APIs using **Apollo Client**. Covers codegen
 
 **Do not use it** if your app uses React Query / TanStack Query — use `graphql-react-query-expert` instead.
 
-| Reference file | What it covers |
-| --- | --- |
-| `graphql-references/apollo-codegen-operations.md` | Codegen config, TypedDocumentNode, operations, fragments, component patterns |
-| `graphql-references/apollo-cache-mutations.md` | InMemoryCache, typePolicies, keyFields, mutations, optimistic updates, pagination |
-| `graphql-references/apollo-client-setup-testing.md` | Link chain setup, client configuration, testing with MSW, performance, SSR |
+| Reference file                                      | What it covers                                                                    |
+| --------------------------------------------------- | --------------------------------------------------------------------------------- |
+| `graphql-references/apollo-codegen-operations.md`   | Codegen config, TypedDocumentNode, operations, fragments, component patterns      |
+| `graphql-references/apollo-cache-mutations.md`      | InMemoryCache, typePolicies, keyFields, mutations, optimistic updates, pagination |
+| `graphql-references/apollo-client-setup-testing.md` | Link chain setup, client configuration, testing with MSW, performance, SSR        |
 
 ---
 
@@ -34,11 +34,11 @@ For React apps that consume GraphQL APIs using **TanStack Query (React Query)** 
 
 **Do not use it** if your app uses Apollo Client — use `graphql-apollo-client-expert` instead.
 
-| Reference file | What it covers |
-| --- | --- |
-| `graphql-references/react-query-codegen-setup.md` | Codegen config with `documentMode: 'string'`, client-preset, QueryClient setup |
-| `graphql-references/react-query-patterns.md` | Query hooks, query key conventions, mutations, pagination, prefetching |
-| `graphql-references/react-query-testing-perf.md` | MSW testing setup, performance tuning, state management, SSR, file organization |
+| Reference file                                    | What it covers                                                                  |
+| ------------------------------------------------- | ------------------------------------------------------------------------------- |
+| `graphql-references/react-query-codegen-setup.md` | Codegen config with `documentMode: 'string'`, client-preset, QueryClient setup  |
+| `graphql-references/react-query-patterns.md`      | Query hooks, query key conventions, mutations, pagination, prefetching          |
+| `graphql-references/react-query-testing-perf.md`  | MSW testing setup, performance tuning, state management, SSR, file organization |
 
 ---
 
@@ -53,23 +53,23 @@ For **GraphQL Ruby** (including Pro) backend APIs in Rails applications. Covers 
 
 **This is the only backend agent.** The other two are frontend-only. If you need to work on both the API and the client in the same session, use this agent for the backend work and the appropriate frontend agent for the client work.
 
-| Reference file | What it covers |
-| --- | --- |
-| `graphql-references/backend-schema-design.md` | Graph thinking vs REST anti-patterns, domain modeling, type design |
-| `graphql-references/backend-error-handling.md` | Mutation standards, input/payload patterns, errors-as-data, query conventions |
-| `graphql-references/backend-performance-dataloader.md` | N+1 prevention, GraphQL::Dataloader sources, performance optimization |
-| `graphql-references/backend-architecture-resolvers.md` | File structure, base classes, resolver patterns, service object delegation |
-| `graphql-references/backend-security-auth-pro.md` | Authentication, Pundit authorization, query complexity limits, Pro features, testing |
+| Reference file                                         | What it covers                                                                       |
+| ------------------------------------------------------ | ------------------------------------------------------------------------------------ |
+| `graphql-references/backend-schema-design.md`          | Graph thinking vs REST anti-patterns, domain modeling, type design                   |
+| `graphql-references/backend-error-handling.md`         | Mutation standards, input/payload patterns, errors-as-data, query conventions        |
+| `graphql-references/backend-performance-dataloader.md` | N+1 prevention, GraphQL::Dataloader sources, performance optimization                |
+| `graphql-references/backend-architecture-resolvers.md` | File structure, base classes, resolver patterns, service object delegation           |
+| `graphql-references/backend-security-auth-pro.md`      | Authentication, Pundit authorization, query complexity limits, Pro features, testing |
 
 ---
 
 ## Quick Reference: Picking the Right Agent
 
-| Your stack | Agent to use |
-| --- | --- |
-| React + Apollo Client | `graphql-apollo-client-expert` |
-| React + TanStack Query + graphql-request | `graphql-react-query-expert` |
-| Rails + graphql-ruby (backend) | `graphql-backend-expert` |
+| Your stack                               | Agent to use                   |
+| ---------------------------------------- | ------------------------------ |
+| React + Apollo Client                    | `graphql-apollo-client-expert` |
+| React + TanStack Query + graphql-request | `graphql-react-query-expert`   |
+| Rails + graphql-ruby (backend)           | `graphql-backend-expert`       |
 
 ---
 

@@ -48,8 +48,8 @@ The reference files below define the **canonical patterns** for this codebase's 
 
 **Only read the reference file(s) relevant to the task at hand.** Do not read all five preemptively — select based on what the user is asking for:
 
-| Task                                       | Read                                                          |
-| ------------------------------------------ | ------------------------------------------------------------- |
+| Task                                       | Read                                                                  |
+| ------------------------------------------ | --------------------------------------------------------------------- |
 | Schema design, types, REST anti-patterns   | `agents/graphql/graphql-references/backend-schema-design.md`          |
 | Error handling, mutations, queries         | `agents/graphql/graphql-references/backend-error-handling.md`         |
 | N+1, Dataloader, performance               | `agents/graphql/graphql-references/backend-performance-dataloader.md` |
