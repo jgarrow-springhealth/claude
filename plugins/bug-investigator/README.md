@@ -30,23 +30,33 @@ Individual agents can be invoked directly:
 @"bug-investigator:reproduce" members get a 500 on intake submit. Role: member.
 ```
 
+## Installation
+
+**Option 1 — Install permanently** (recommended):
+
+```bash
+cp -r /path/to/claude-setup/plugins/bug-investigator ~/.claude/plugins/
+```
+
+Claude Code will automatically load plugins from `~/.claude/plugins/` on startup.
+
+**Option 2 — Load for a single session:**
+
+```bash
+claude --plugin-dir /path/to/claude-setup/plugins/bug-investigator
+```
+
 ## Prerequisites
 
-### GitHub plugin (required, not bundled)
+### GitHub MCP server (required, not bundled)
 
 The `code` agent uses the GitHub MCP server to search repos, read code, and check commits. This plugin does **not** bundle the GitHub MCP because it requires a GitHub App installation tied to your org.
 
-Install it from the official marketplace:
-
-```
-/plugin install github
-```
-
-Follow the prompts to authenticate with your GitHub account.
+Configure it in your `~/.claude/settings.json` under `mcpServers`. See the [Claude Code MCP docs](https://docs.anthropic.com/en/docs/claude-code/mcp) for setup instructions.
 
 ### Bundled MCP servers
 
-The following MCP servers are bundled with this plugin via `.mcp.json`. If you already have any of these configured, your existing configuration takes precedence.
+The following MCP servers are bundled with this plugin via `.mcp.json`. If you already have any of these configured globally, your existing configuration takes precedence.
 
 | MCP Server                        | Used by           | Purpose                                  |
 | --------------------------------- | ----------------- | ---------------------------------------- |
@@ -58,20 +68,6 @@ The following MCP servers are bundled with this plugin via `.mcp.json`. If you a
 | LaunchDarkly (feature management) | code agent        | Check feature flag state                 |
 
 Most of these use OAuth and will prompt you to authenticate on first use.
-
-## Installation
-
-Install from the marketplace:
-
-```bash
-/plugin install bug-investigator@springcare-plugins
-```
-
-Or load from a local path for development/testing:
-
-```bash
-claude --plugin-dir /path/to/bug-investigator-plugin
-```
 
 ## Components
 
