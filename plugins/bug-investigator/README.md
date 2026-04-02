@@ -2,6 +2,11 @@
 
 Investigate and diagnose bugs in SpringCare applications. Coordinates parallel subagents to gather data from multiple sources, then synthesizes findings into a Confluence RCA document.
 
+## TODO
+
+- [ ] Improve on Datadog research in the `data` agent. At the time of creating this plugin, we did not yet have access to the Datadog MCP. 
+- [ ] Improve Playwright implementation. It's not super reliable, as it relies on good seed data to exist in dev. And I'm also not loving the screen recording side of the implementation here. Lots of room for improvement in the automated bug reproduction side of things.
+
 ## What it does
 
 When you report a bug (via Jira ticket URL, Slack post link, or description), the plugin:
