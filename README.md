@@ -16,15 +16,19 @@ This repo contains custom Claude Code agents, skills, commands, and configuratio
   - [bug-investigator](#bug-investigator-plugin)
 - [Agents](#agents)
   - [Planning](#planning)
-    - [jira-ticket-planner](#jira-ticket-planner)
     - [gap-analyzer](#gap-analyzer)
   - [GraphQL Specialist Agents](#graphql-specialist-agents)
 - [Skills](#skills)
+  - [Planning](#planning-1)
+    - [/jira-ticket-planner](#jira-ticket-planner-skill)
   - [Code Review](#code-review-1)
     - [/review-pr](#review-pr)
     - [/review-code (multi-model)](#review-code-multi-model)
   - [Ralph — Spec-Driven Development Workflow](#ralph--spec-driven-development-workflow)
   - [Beads — Issue Tracking for AI Agents](#beads--issue-tracking-for-ai-agents)
+- [Templates](#templates)
+  - [agent-ready-ticket](#agent-ready-ticket)
+  - [agent-ready-discovery-ticket](#agent-ready-discovery-ticket)
 - [Workflow Patterns](#workflow-patterns)
   - [Starting from a JIRA ticket (with Beads)](#starting-from-a-jira-ticket-with-beads)
   - [Starting from a JIRA ticket (without Beads)](#starting-from-a-jira-ticket-without-beads)
@@ -43,6 +47,7 @@ To use these, copy what you need into your own `~/.claude/` directory:
 - `agents/` → `~/.claude/agents/`
 - `commands/` → `~/.claude/commands/`
 - `skills/` → `~/.claude/skills/`
+- `templates/` → `~/.claude/templates/`
 - `settings.json` → `~/.claude/settings.json` (or merge into your existing one)
 
 Claude Code automatically picks up files in these directories.
@@ -153,29 +158,6 @@ Agents are subprocesses that Claude can spin up to handle specialized tasks auto
 
 ### Planning
 
-#### `jira-ticket-planner`
-
-**File:** `agents/jira-ticket-planner.md`
-
-**Model:** Opus (more capable for nuanced discovery and decomposition work)
-
-**What it does:** Acts as a Technical Product Analyst and Engineering Lead to help you go from a JIRA ticket to a clear, actionable plan. It fetches ticket details via the Atlassian MCP, asks targeted clarifying questions, explores the codebase for relevant context, and either produces a Discovery Summary (for tasks) or breaks the work into well-scoped child tickets (for epics and stories). **Does not write code or make code changes.**
-
-**Workflows by ticket type:**
-
-- **Epics / Stories** — Fetches the ticket, reviews any linked Figma designs (via the Figma MCP), proposes a breakdown of independently deliverable tasks, and (after your approval) creates them in JIRA as child tickets.
-- **Tasks** — Fetches the ticket, explores the codebase to identify relevant files and patterns, and produces a Discovery Summary with a plain-English restatement, files likely to change, an implementation plan, and open questions/risks.
-
-**When to use it:** Any time you're handed a JIRA ticket and want clarity on scope, a decomposition into subtasks, or a codebase-grounded implementation plan before writing any code. Example:
-
-```
-Can you help me break down ENG-42?
-Let's work on ENG-87
-ENG-55 is really vague — can you help me figure out what we're actually building?
-```
-
-**Persistent memory:** This agent maintains its own memory at `~/.claude/agent-memory/jira-ticket-planner/` to build up institutional knowledge across planning sessions (frequently touched files, team naming conventions, common decomposition patterns, recurring ambiguities, etc.).
-
 #### `gap-analyzer`
 
 **File:** `agents/gap-analyzer.md`
@@ -223,6 +205,31 @@ See [`agents/graphql/README.md`](agents/graphql/README.md) for detailed document
 ## Skills
 
 Skills are reusable prompt templates that Claude loads when invoked via `/skill-name`. They live in `skills/` and appear in Claude's available skill list.
+
+### Planning {#planning-1}
+
+#### `/jira-ticket-planner` {#jira-ticket-planner-skill}
+
+**File:** `skills/jira-ticket-planner.md`
+
+**Invocation:** Triggered automatically when you mention a JIRA ticket ID or URL, or explicitly by describing the task.
+
+**What it does:** Bridges the gap between a JIRA ticket and actionable engineering work. It fetches the ticket (and its parent chain) via the Atlassian MCP, proactively reviews any linked Figma designs or Confluence docs, asks targeted clarifying questions, and produces one of two outputs depending on ticket type:
+
+- **Epics / Stories** — Proposes a numbered breakdown of independently deliverable tasks. Each task is structured using one of two templates (see [Templates](#templates) below): implementation tasks use the `agent-ready-ticket` template with Gherkin ACs, scope boundaries, and verification steps; discovery tasks use the `agent-ready-discovery-ticket` template with a single question, named output artifact, and time-box. After your approval, creates all tasks as JIRA child tickets and links dependencies.
+- **Tasks** — Produces a Discovery Summary: plain-English restatement, technical approach options, files likely to change, patterns to follow, implementation plan, feature flag considerations, test cases, and open questions.
+
+**Does not write implementation code or make code changes.**
+
+**Examples:**
+
+```
+Can you help me break down ENG-42?
+Let's work on ENG-87
+ENG-55 is really vague — can you help me figure out what we're actually building?
+```
+
+---
 
 ### Code Review
 
@@ -303,6 +310,42 @@ See [`skills/beads/README.md`](skills/beads/README.md) for full documentation.
 
 ---
 
+## Templates
+
+Templates are structured prompt fragments that Claude reads and applies when generating content. They live in `templates/` and are copied to `~/.claude/templates/`. Skills that reference templates load them by path at runtime.
+
+### `agent-ready-ticket`
+
+**File:** `templates/agent-ready-ticket.md`
+
+**Used by:** `jira-ticket-planner` (for implementation tasks in an epic/story breakdown)
+
+A template for implementation tickets that are ready for an agent to execute. Structures a ticket as a prompt — with all the context needed to do the work correctly and nothing extraneous. Sections:
+
+- **Acceptance Criteria** _(required)_ — Gherkin-style (`Given/When/Then`), one scenario per distinct behavior. If you need more than ~5, the ticket is too big.
+- **In-Scope Paths** _(optional)_ — Files or directories to touch. Include only when ambiguity would cause drift.
+- **Explicit Out of Scope** _(optional)_ — Things an agent might reasonably do but shouldn't.
+- **Constraints & Invariants** _(optional)_ — Rules that must hold; edge cases to respect.
+- **Known Dependencies** _(optional)_ — Blocked-by / blocks links to prevent out-of-order execution.
+- **How to Verify** _(optional)_ — The specific command to run when done.
+- **Context Pointers** _(optional)_ — Links to the epic, PRD, or design decisions.
+
+### `agent-ready-discovery-ticket`
+
+**File:** `templates/agent-ready-discovery-ticket.md`
+
+**Used by:** `jira-ticket-planner` (for discovery tasks in an epic/story breakdown)
+
+A template for scoped discovery tickets — investigations that need to happen before implementation can begin. Forces a single answerable question, a named output artifact, and a hard time-box so discovery doesn't become open-ended research. Sections:
+
+- **The Question** _(required)_ — One answerable question. If it takes more than two sentences, it's probably two tickets.
+- **Output Artifact** _(required)_ — A single named thing (ADR, scoping doc, epic update, Slack summary + linked doc, etc.).
+- **Time-box** _(required)_ — A hard limit. Discovery without a time-box is just research.
+- **Starting Points** _(optional)_ — Prior art, relevant code, people to ask.
+- **Explicit Out of Scope** _(optional)_ — Only if there's real risk of drift.
+
+---
+
 ## Workflow Patterns
 
 These tools are designed to work together. Here's how they fit depending on whether you're starting from a JIRA ticket or from scratch.
@@ -311,7 +354,7 @@ These tools are designed to work together. Here's how they fit depending on whet
 
 | Tool                        | Job                                                                          | Produces                              |
 | --------------------------- | ---------------------------------------------------------------------------- | ------------------------------------- |
-| `jira-ticket-planner`       | Translate a JIRA ticket into grounded clarity — scope, AC, unknowns resolved | Discovery Summary or JIRA child tasks |
+| `/jira-ticket-planner`      | Translate a JIRA ticket into grounded clarity — scope, AC, unknowns resolved | Discovery Summary or JIRA child tasks |
 | `ralph:create-requirements` | Formalize what to build into a structured spec                               | `specs/<name>.md`                     |
 | `ralph:plan`                | Codebase-verified gap analysis                                               | `IMPLEMENTATION_PLAN.md`              |
 | `beads:create`              | Convert plan into tracked, dependency-aware issues                           | Beads issues                          |
@@ -403,9 +446,9 @@ Use this for work that has no associated JIRA ticket.
 
 ### Why these tools aren't duplicates
 
-It's easy to look at `jira-ticket-planner`, `ralph:create-requirements`, and the `start-project` skills and think they all do the same thing. They don't:
+It's easy to look at `/jira-ticket-planner`, `ralph:create-requirements`, and the `start-project` skills and think they all do the same thing. They don't:
 
-- **`jira-ticket-planner`** works in JIRA's context — it fetches ticket history, linked issues, parent epics, and Figma designs, then asks clarifying questions to resolve ambiguities that exist in the _ticket_. Its output is human-readable clarity and, for epics, JIRA child tasks. It has no concept of specs, branches, or the build pipeline.
+- **`/jira-ticket-planner`** works in JIRA's context — it fetches ticket history, linked issues, parent epics, and Figma designs, then asks clarifying questions to resolve ambiguities that exist in the _ticket_. Its output is human-readable clarity and, for epics, agent-ready JIRA child tasks (using the `agent-ready-ticket` and `agent-ready-discovery-ticket` templates). It has no concept of specs, branches, or the build pipeline.
 
 - **`ralph:create-requirements`** works in the codebase's context — it produces the structured `specs/<name>.md` file that `ralph:plan`, `beads:create`, and the build loop all depend on as their source of truth. Without this file, the rest of the Ralph/Beads pipeline has nothing to work from.
 
