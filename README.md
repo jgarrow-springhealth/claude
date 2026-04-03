@@ -15,8 +15,6 @@ This repo contains custom Claude Code agents, skills, commands, and configuratio
 - [Plugins](#plugins)
   - [bug-investigator](#bug-investigator-plugin)
 - [Agents](#agents)
-  - [Code Review](#code-review)
-    - [bug-jury](#bug-jury)
   - [Planning](#planning)
     - [jira-ticket-planner](#jira-ticket-planner)
     - [gap-analyzer](#gap-analyzer)
@@ -153,29 +151,6 @@ See [`plugins/bug-investigator/README.md`](plugins/bug-investigator/README.md) f
 
 Agents are subprocesses that Claude can spin up to handle specialized tasks autonomously. They live in `agents/` and are loaded by Claude Code as available agent types.
 
-### Code Review
-
-#### `bug-jury`
-
-**File:** `agents/bug-jury.md`
-
-**Model:** Sonnet by default (overridable via the `review-pr` skill)
-
-**What it does:** Orchestrates a multi-expert panel of sub-agents to review a Git branch or GitHub Pull Request from every angle — security, performance, observability, DevOps, code quality, testing, and more. Each expert independently reviews the diff through their specific lens, then the Judge synthesizes all findings into a structured verdict with severity-bucketed issues, commendations, and an action checklist. **Read-only — never makes or suggests code changes.**
-
-**Expert panel:**
-
-- **Core panel (always active):** Security Auditor (including dependency review), Performance Analyst, Telemetry & Observability Engineer, DevOps & Infrastructure Reviewer, Code Quality + Testing & Architecture Reviewer
-- **Conditional panel (activated based on detected stack):** a11y Specialist, Documentation & DX Reviewer, Rails Expert, React & Frontend Expert, GraphQL Specialist, Database & Query Reviewer, API Design Reviewer, Mobile Reviewer, TypeScript Reviewer, i18n Reviewer
-
-**Output format:** A structured `BUG JURY REVIEW` document with an executive summary, judge's verdict (Approve / Approve with Required Changes / Reject), issues by severity (Critical → Low), commendations, and a recommended action checklist.
-
-**When to use it:** Before merging any branch or PR where you want a thorough, multi-domain review. Best triggered via the `review-pr` skill (below) rather than directly.
-
-**Persistent memory:** This agent maintains its own memory at `~/.claude/agent-memory/bug-jury/` to build up institutional knowledge across reviews (codebase conventions, recurring issue patterns, high-risk areas, past verdicts, etc.).
-
----
-
 ### Planning
 
 #### `jira-ticket-planner`
@@ -257,7 +232,9 @@ Skills are reusable prompt templates that Claude loads when invoked via `/skill-
 
 **Invocation:** `/review-pr [branch-or-pr-url] [--fast|--deep]`
 
-**What it does:** Triggers the `bug-jury` agent with model selection based on an optional flag:
+**What it does:** Orchestrates a multi-expert panel of sub-agents to review a Git branch or GitHub Pull Request from every angle — security, performance, observability, code quality, testing, and more. Each expert independently reviews the diff through their specific lens, then a Judge synthesizes findings into a structured verdict with severity-bucketed issues, commendations, and an action checklist. **Read-only — never makes or suggests code changes.**
+
+Model selection is controlled by an optional flag:
 
 | Flag     | Model  | Best for                                      |
 | -------- | ------ | --------------------------------------------- |
