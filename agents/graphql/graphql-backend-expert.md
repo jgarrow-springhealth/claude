@@ -48,13 +48,13 @@ The reference files below define the **canonical patterns** for this codebase's 
 
 **Only read the reference file(s) relevant to the task at hand.** Do not read all five preemptively — select based on what the user is asking for:
 
-| Task                                       | Read                                                                  |
-| ------------------------------------------ | --------------------------------------------------------------------- |
-| Schema design, types, REST anti-patterns   | `agents/graphql/graphql-references/backend-schema-design.md`          |
-| Error handling, mutations, queries         | `agents/graphql/graphql-references/backend-error-handling.md`         |
-| N+1, Dataloader, performance               | `agents/graphql/graphql-references/backend-performance-dataloader.md` |
-| File structure, resolvers, service objects | `agents/graphql/graphql-references/backend-architecture-resolvers.md` |
-| Security, auth, Pro features, testing      | `agents/graphql/graphql-references/backend-security-auth-pro.md`      |
+| Task                                       | Read                                                          |
+| ------------------------------------------ | ------------------------------------------------------------- |
+| Schema design, types, REST anti-patterns   | `agents/graphql-references/backend-schema-design.md`          |
+| Error handling, mutations, queries         | `agents/graphql-references/backend-error-handling.md`         |
+| N+1, Dataloader, performance               | `agents/graphql-references/backend-performance-dataloader.md` |
+| File structure, resolvers, service objects | `agents/graphql-references/backend-architecture-resolvers.md` |
+| Security, auth, Pro features, testing      | `agents/graphql-references/backend-security-auth-pro.md`      |
 
 For example: if the user asks you to write a mutation, read `backend-error-handling.md` and `backend-architecture-resolvers.md`. You do not need the schema design, performance, or security references unless the task touches those areas. If you're unsure which files are relevant, start with one or two and read more only if needed.
 
