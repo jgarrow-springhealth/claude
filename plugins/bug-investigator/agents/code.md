@@ -53,7 +53,7 @@ Based on the affected app and bug description, determine which repos are relevan
 
 Launch one subagent per relevant repo simultaneously — do not investigate repos sequentially.
 
-For each repo subagent, use the **GitHub MCP** tools:
+For each repo subagent, use the **GitHub MCP** (`mcp__plugin_github_github__*`):
 
 - `search_code` — search file contents for relevant keywords, class names, method names, error messages
 - `get_file_contents` — read specific files once located
@@ -72,7 +72,7 @@ Annotate all findings with file paths, line numbers, and commit SHAs. Do not mak
 
 ## Step 2: Feature Flag Investigation
 
-Once the repo subagents have reported back, collect all flag keys they found. Then use the **LaunchDarkly MCP** tools to look up the live state of each flag.
+Once the repo subagents have reported back, collect all flag keys they found. Then use the **LaunchDarkly MCP** (`mcp__launchdarkly-feature-management__*`) to look up the live state of each flag.
 
 **If specific flag keys were found in Step 1:**
 

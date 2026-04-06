@@ -1,5 +1,8 @@
 {
   "name": "bug-investigator",
   "description": "Investigate and diagnose bugs in SpringCare applications. Coordinates parallel subagents to gather data from Snowflake, Datadog, Mixpanel, Slack, GitHub, and LaunchDarkly, then synthesizes findings into a Confluence RCA document.",
+  "author": {
+    "name": "Janessa Garrow"
+  },
   "version": "1.0.0"
 }

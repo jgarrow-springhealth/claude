@@ -16,11 +16,18 @@ When you report a bug (via Jira ticket URL, Slack post link, or description), th
 3. Attempts to reproduce the bug on dev using Playwright
 4. Synthesizes all findings into a Confluence RCA page and comments on the Jira ticket
 
+## Installation
+
+```bash
+claude plugin marketplace add SpringCare/ai-registry@marketplace
+claude plugin install bug-investigator
+```
+
 ## Usage
 
 Full investigation:
 
-```
+```bash
 /bug-investigator:investigate https://springhealth.atlassian.net/browse/ENG-1234
 ```
 
@@ -28,40 +35,30 @@ Or just describe the bug and the skill will trigger automatically.
 
 Individual agents can be invoked directly:
 
-```
+```txt
 @"bug-investigator:data" pull signals for ENG-5678
 @"bug-investigator:slack" anything about session note failures this week?
 @"bug-investigator:code" find the benefit limit code in Member Portal
 @"bug-investigator:reproduce" members get a 500 on intake submit. Role: member.
 ```
 
-## Installation
-
-**Option 1 — Install permanently** (recommended):
-
-```bash
-cp -r /path/to/claude-setup/plugins/bug-investigator ~/.claude/plugins/
-```
-
-Claude Code will automatically load plugins from `~/.claude/plugins/` on startup.
-
-**Option 2 — Load for a single session:**
-
-```bash
-claude --plugin-dir /path/to/claude-setup/plugins/bug-investigator
-```
-
 ## Prerequisites
 
-### GitHub MCP server (required, not bundled)
+### GitHub plugin (required, not bundled)
 
 The `code` agent uses the GitHub MCP server to search repos, read code, and check commits. This plugin does **not** bundle the GitHub MCP because it requires a GitHub App installation tied to your org.
 
-Configure it in your `~/.claude/settings.json` under `mcpServers`. See the [Claude Code MCP docs](https://docs.anthropic.com/en/docs/claude-code/mcp) for setup instructions.
+Install it from the official marketplace:
+
+```bash
+/plugin install github
+```
+
+Follow the prompts to authenticate with your GitHub account.
 
 ### Bundled MCP servers
 
-The following MCP servers are bundled with this plugin via `.mcp.json`. If you already have any of these configured globally, your existing configuration takes precedence.
+The following MCP servers are bundled with this plugin via `.mcp.json`. If you already have any of these configured, your existing configuration takes precedence.
 
 | MCP Server                        | Used by           | Purpose                                  |
 | --------------------------------- | ----------------- | ---------------------------------------- |
@@ -73,6 +70,26 @@ The following MCP servers are bundled with this plugin via `.mcp.json`. If you a
 | LaunchDarkly (feature management) | code agent        | Check feature flag state                 |
 
 Most of these use OAuth and will prompt you to authenticate on first use.
+
+## Installation
+
+Register the Spring Health marketplace (one time):
+
+```bash
+claude plugin marketplace add SpringCare/ai-registry@marketplace
+```
+
+Then install the plugin:
+
+```bash
+claude plugin install bug-investigator
+```
+
+Or load from a local path for development/testing:
+
+```bash
+claude --plugin-dir /path/to/bug-investigator-plugin
+```
 
 ## Components
 

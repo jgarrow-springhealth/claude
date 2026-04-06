@@ -67,16 +67,16 @@ Launch all three subagents simultaneously — do not wait for one to finish befo
 
 ### Subagent A: Mixpanel
 
-Use the Mixpanel MCP tools directly. Do not skip to manual queries without trying.
+Use `mcp__mixpanel__*` tools directly. Do not skip to manual queries without trying.
 
-1. Use the Mixpanel `Get-Events` tool to find event names relevant to the affected feature area.
-2. Use the Mixpanel `Get-Event-Details` tool to inspect properties on candidate events.
-3. Use the Mixpanel `Run-Query` tool to query events filtered by the known identifiers (user ID, time range, etc.), using the correct project ID from the App → Project Reference above.
+1. Use `mcp__mixpanel__Get-Events` to find event names relevant to the affected feature area.
+2. Use `mcp__mixpanel__Get-Event-Details` to inspect properties on candidate events.
+3. Use `mcp__mixpanel__Run-Query` to query events filtered by the known identifiers (user ID, time range, etc.), using the correct project ID from the App → Project Reference above.
 4. Document: the events queried, filters applied, and what the results show.
 
 If the MCP returns a permissions error or is unavailable, generate a manual query instead:
 
-- Search the relevant frontend repo (`caregiver-portal`, `member-portal`, or `admin-portal`) on GitHub via the GitHub MCP `search_code` tool to find actual event names and properties.
+- Search the relevant frontend repo (`caregiver-portal`, `member-portal`, or `admin-portal`) on GitHub via `mcp__plugin_github_github__search_code` to find actual event names and properties.
 - Provide exact event names, property filters, and time range.
 - Label it **`[REQUIRES USER ACTION — Mixpanel]`**
 
@@ -84,7 +84,7 @@ If the MCP returns a permissions error or is unavailable, generate a manual quer
 
 ### Subagent B: Datadog
 
-Use the Datadog MCP tools directly. Do not skip to manual queries without trying.
+Use `mcp__datadog-mcp__*` tools directly. Do not skip to manual queries without trying.
 
 1. Attempt to search logs scoped to the affected time range and known identifiers (user ID, session ID, error message).
 2. Specify the log type: APM traces, RUM sessions, Log Management, etc.
@@ -92,7 +92,7 @@ Use the Datadog MCP tools directly. Do not skip to manual queries without trying
 
 If the MCP is unavailable or returns a permissions error, generate a manual query instead:
 
-- Search GitHub (use the GitHub MCP `search_code` tool in `rotom`) for the logging code in the relevant code path to find actual log key names and structure.
+- Search GitHub (`mcp__plugin_github_github__search_code` in `rotom`) for the logging code in the relevant code path to find actual log key names and structure.
 - Provide the exact search string, log type, time range, and fields to inspect.
 - Label it **`[REQUIRES USER ACTION — Datadog]`**
 
@@ -104,7 +104,7 @@ Snowflake is not accessible via MCP. Proceed directly to generating manual queri
 
 Before writing any SQL:
 
-1. Search GitHub (use the GitHub MCP `search_code` and `get_file_contents` tools in `rotom`) to find:
+1. Search GitHub (`mcp__plugin_github_github__search_code` and `get_file_contents` in `rotom`) to find:
    - ActiveRecord models for the affected feature area
    - Database migrations that reveal table names and column names
    - Any relevant scopes or query patterns used in the codebase
